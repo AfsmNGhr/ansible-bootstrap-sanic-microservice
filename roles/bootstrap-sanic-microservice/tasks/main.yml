@@ -1,0 +1,67 @@
+---
+
+- name: Create bitbucket private repository
+  uri:
+    url: 'https://api.bitbucket.org/2.0/repositories/{{ team }}/{{ repo }}'
+    method: POST
+    body: '{"scm": "git", "is_private": "true", "fork_policy": "no_public_forks"}'
+    body_format: json
+    user: '{{ bitbucket_user }}'
+    password: '{{ bitbucket_password }}'
+    headers:
+      Content-Type: 'application/json'
+
+- name: Prepare README
+  template:
+     src: README.md.j2
+     dest: /tmp/README.md
+
+- name: Create README into repository
+  shell: >
+    curl -X POST -u {{ bitbucket_user }}:{{ bitbucket_password }} https://api.bitbucket.org/2.0/repositories/{{ team }}/{{ repo }}/src \
+    -F README.md=@"/tmp/README.md" -H 'Content-Type: multipart/form-data'
+
+- name: Delete README
+  file:
+    state: absent
+    path: /tmp/README.md
+
+- name: Create submodule
+  shell: >
+    bash -lc "cd '{{ core_path }}' && git submodule add git@bitbucket.org:{{ team }}/{{ repo }}.git {{ submodule_path }}"
+
+- name: Initialize submodule
+  shell: git submodule update --init
+
+- name: Creates app directory
+  file:
+    path: '{{ project_path }}/app'
+    state: directory
+
+- name: Copy bootstrap files
+  template:
+     src: '{{ item.src }}'
+     dest: '{{ item.dest }}'
+  with_items:
+    - {'src': '.pylintrc.j2', 'dest': '{{ project_path }}/.pylintrc'}
+    - {'src': '.gitignore.j2', 'dest': '{{ project_path }}/.gitignore'}
+    - {'src': '.dockerignore.j2', 'dest': '{{ project_path }}/.dockerignore'}
+    - {'src': 'requirements.txt.j2', 'dest': '{{ project_path }}/requirements.txt'}
+    - {'src': 'requirements.development.txt.j2', 'dest': '{{ project_path }}/requirements.development.txt'}
+    - {'src': '.env.j2', 'dest': '{{ project_path }}/.env'}
+    - {'src': 'build.j2', 'dest': '{{ project_path }}/build'}
+    - {'src': 'Dockerfile.j2', 'dest': '{{ project_path }}/Dockerfile'}
+    - {'src': 'docker-compose.yml.j2', 'dest': '{{ project_path }}/docker-compose.yml'}
+    - {'src': 'docker-compose.development.yml.j2', 'dest': '{{ project_path }}/docker-compose.development.yml'}
+    - {'src': 'docker-compose.test.yml.j2', 'dest': '{{ project_path }}/docker-compose.test.yml'}
+    - {'src': 'docker-compose.production.yml.j2', 'dest': '{{ project_path }}/docker-compose.production.yml'}
+    - {'src': 'docker-compose.swarm.yml.j2', 'dest': '{{ project_path }}/docker-compose.swarm.yml'}
+    - {'src': 'app.py.j2', 'dest': '{{ project_path }}/app.py'}
+    - {'src': 'app/config.py.j2', 'dest': '{{ project_path }}/app/config.py'}
+    - {'src': 'app/__init__.py.j2', 'dest': '{{ project_path }}/app/__init__.py'}
+
+- name: Initial commit
+  shell: bash -lc "cd '{{ project_path }}' && git add -A && git commit -am 'Initial commit with bootstrap files.'"
+
+- name: Push to repository
+  shell: bash -lc "cd '{{ project_path }}' && git push origin master"

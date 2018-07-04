@@ -1,0 +1,42 @@
+# {{ repo.split('.')[0].split('_') | join(' ') | capitalize }} Service
+
+## Get started with docker
+
+#### [Install Docker Engine](https://docs.docker.com/engine/installation/):
+#### [Install Docker Compose](https://docs.docker.com/compose/install/):
+#### Clone the repository:
+
+```
+git clone git@bitbucket.org:{{ team }}/{{ repo }}.git
+```
+
+#### Go to the project folder:
+
+```
+cd {{ repo }}
+```
+
+#### Create link override configuration:
+
+```
+ln -s docker-compose.development.yml docker-compose.override.yml
+```
+
+#### Let's develop:
+
+```
+docker-compose up --build
+```
+
+## Dependent variables:
+
+#### Requires:
+
+```
+```
+
+#### Optional:
+
+```
+DEBUG - livereload
+```

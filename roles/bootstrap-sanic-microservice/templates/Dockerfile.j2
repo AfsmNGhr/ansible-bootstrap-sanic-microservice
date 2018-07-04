@@ -1,0 +1,19 @@
+FROM python:3.6.5-alpine3.7
+
+RUN apk --update add --no-cache --virtual .base build-base git
+
+COPY requirements.txt /
+RUN pip install --no-cache-dir -r /requirements.txt && \
+    rm /requirements.txt && \
+    adduser -D -S -u 1000 -G users -h /home/{{ repo.split('.')[0] }} {{ repo.split('.')[0] }} && \
+    apk del .base && \
+    rm -rf /tmp/* /var/tmp/* /usr/share/man /tmp/* /var/tmp/* \
+        /var/cache/apk/* /var/log/* ~/.cache
+
+COPY . /home/{{ repo.split('.')[0] }}
+RUN rm /home/{{ repo.split('.')[0] }}/requirements.txt && \
+    chown -R {{ repo.split('.')[0] }}:users /home/{{ repo.split('.')[0] }}
+
+USER {{ repo.split('.')[0] }}
+WORKDIR /home/{{ repo.split('.')[0] }}
+CMD python app.py

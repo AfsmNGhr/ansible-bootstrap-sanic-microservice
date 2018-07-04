@@ -1,0 +1,6 @@
+version: '3.2'
+services:
+  {{ repo.split('.')[0] }}:
+    image: "${REGISTRY}/{{'${'}}{{ repo.split('.')[0] | upper }}_SERVICE{{'}'}}:{{'${'}}{{ repo.split('.')[0] | upper }}_SERVICE__VERSION{{'}'}}{{'{{'}} postfix {{'}}'}}"
+    ports:
+      - 5000

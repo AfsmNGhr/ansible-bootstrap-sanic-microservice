@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    cmd=$(greadlink -f "$0")
+else
+    cmd=$(readlink -f "$0")
+fi
+
+DIR=$(dirname "$cmd")
+env=${1:-test}
+export $(cat "$DIR/.env")
+
+docker-compose -f "$DIR/docker-compose.$env.yml" build "${{ repo.split('.')[0] | upper }}_SERVICE__CONTAINER"
+
+if [ "$?" -eq 0 ]; then # SC2181: not found the best solution ...
+    image=$(
+        docker-compose -f "$DIR/docker-compose.$env.yml" config | \
+            awk "/${{ repo.split('.')[0] | upper }}_SERVICE__CONTAINER:/,/image:/" | \
+            awk '/image:/{ printf $2 }'
+         )
+    docker push "$image"
+fi

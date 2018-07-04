@@ -1,0 +1,13 @@
+version: '3.2'
+services:
+  {{ repo.split('.')[0] }}:
+    image: "$REGISTRY/{{'${'}}{{ repo.split('.')[0] | upper }}_SERVICE{{'}'}}:{{'${'}}{{ repo.split('.')[0] | upper }}_SERVICE__VERSION{{'}'}}"
+    build:
+      context: .
+      cache_from:
+        - "$REGISTRY/{{'${'}}{{ repo.split('.')[0] | upper }}_SERVICE{{'}'}}:{{'${'}}{{ repo.split('.')[0] | upper }}_SERVICE__VERSION{{'}'}}-test"
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 3s

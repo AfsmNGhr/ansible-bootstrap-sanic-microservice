@@ -1,0 +1,22 @@
+version: '3.2'
+services:
+  {{ repo.split('.')[0] }}:
+    image: "$REGISTRY/{{'${'}}{{ repo.split('.')[0] | upper }}_SERVICE{{'}'}}:{{'${'}}{{ repo.split('.')[0] | upper }}_SERVICE__VERSION{{'}'}}-test"
+    command: sh -c 'pip install --user --no-cache-dir -r requirements.development.txt && python app.py'
+    build:
+      context: .
+      cache_from:
+        - "$REGISTRY/{{'${'}}{{ repo.split('.')[0] | upper }}_SERVICE{{'}'}}:{{'${'}}{{ repo.split('.')[0] | upper }}_SERVICE__VERSION{{'}'}}-test"
+    networks:
+      - net
+    volumes:
+      - .:/home/{{ repo.split('.')[0] }}
+    ports:
+      - 5000
+    stdin_open: true
+    tty: true
+    environment:
+      DEBUG: 'true'
+      PATH: '/home/{{ repo.split('.')[0] }}/.local/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+networks:
+  net:

@@ -1,0 +1,13 @@
+version: '3.2'
+services:
+  {{ repo.split('.')[0] }}:
+    networks:
+      - {{ repo.split('.')[0] }}
+    healthcheck:
+      test: 'nc -z localhost 5000 > /dev/null 2>&1 || exit 1'
+    deploy:
+      mode: replicated
+      restart_policy:
+        condition: on-failure
+networks:
+  {{ repo.split('.')[0] }}:
