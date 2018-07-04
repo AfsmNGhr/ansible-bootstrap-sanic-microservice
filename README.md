@@ -28,5 +28,5 @@ Example Playbook:
     registry: example.com # our docker registry
     core_path: /home/test/core.services # absolute path with services
     submodules_path: 'services/{{ repo }}'
-    project_path:' /home/test/core.services/services/{{ repo }}' # absolute project path
+    project_path: '/home/test/core.services/services/{{ repo }}' # absolute project path
 ```
